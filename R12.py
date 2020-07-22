@@ -1,5 +1,5 @@
 import argparse
-import numpy as np
+import random
 
 
 def parse_args():
@@ -25,7 +25,7 @@ class Agent():
 
     def walk(self, network):
         # move neighbor node from now randomly
-        self.now = np.random.choice(list(network.get_neighbors(self.now)))
+        self.now = random.choice(network.get_neighbors(self.now))
 
     def is_goal(self):
         return self.now == self.end
@@ -42,6 +42,9 @@ class Network():
         self.agents = [
             Agent(request_node, target_node) for _ in range(n_agents)
         ]
+        self.neighbor_ = {}
+        self.set_neighbors()
+
 
     def init(self):
         self.time = 0
@@ -62,8 +65,12 @@ class Network():
                 neighbor[j][i] = w
         return neighbor
 
+    def set_neighbors(self):
+        for i in range(1,len(self.neighbor)+1):
+            self.neighbor_[i] = list(self.neighbor[i].keys())
+
     def get_neighbors(self, node):
-        return set(self.neighbor[node].keys())
+        return self.neighbor_[node]
 
     def advance(self):
         self.time += 1
@@ -88,7 +95,7 @@ def main():
         while not network.is_goal:
             network.advance()
         search_times.append(network.time)
-    mu_hat = np.average(search_times)
+    mu_hat = sum(search_times) / n_tries
     print(f"average_search_time: {mu_hat}[hops]")
     print(f"node {target_node}'s weighted_degree:",
           len(network.get_neighbors(target_node)))
